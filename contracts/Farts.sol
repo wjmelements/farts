@@ -62,6 +62,7 @@ contract Farts /*is IERC20*/ {
     function mintWithGasToken(IGasToken gasToken, uint256 burn) external {
         uint256 gas = gasleft();
         require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
+        require (!entered);
         gasToken.freeFrom(msg.sender, burn);
         balanceOf[msg.sender] += 1000000000000;
         totalSupply += 1000000000000;
