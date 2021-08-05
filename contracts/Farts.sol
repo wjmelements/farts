@@ -9,9 +9,9 @@ contract Farts /*is IERC20*/ {
 
     string public constant name = "BlockFarts"; // Attn Rappers: this rhymes with PopTarts
     string public constant symbol = "FARTS";
-    IGasToken public constant GST1 = IGasToken(0x88d60255F917e3eb94eaE199d827DAd837fac4cB);
-    IGasToken public constant GST2 = IGasToken(0x0000000000b3F879cb30FE243b4Dfee438691c04);
-    IGasToken public constant CHI = IGasToken(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+    IGasToken public constant GST1 = IGasToken(0x88d60255F917e3eb94eaE199d827DAd837fac4cB);  /** GasTokenV1 */
+    IGasToken public constant GST2 = IGasToken(0x0000000000b3F879cb30FE243b4Dfee438691c04); /** GasTokenV2 */
+    IGasToken public constant CHI = IGasToken(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c); /** 1inch CHI */
     IGasToken public constant LGT = IGasToken(0x000000000000C1CB11D5c062901F32D06248CE48); /** Liquid Gas Token */
     uint8 public constant decimals = 12;
     uint256 public constant INFINITE = 0xe00000000000000000000000;
