@@ -6,7 +6,6 @@ interface IGasToken {
     function freeFrom(address, uint256) external returns (bool);
 }
 
-
 contract Farts /*is IERC20*/ {
 
     string public constant name = "BlockFarts"; // Attn Rappers: this rhymes with PopTarts
@@ -96,12 +95,12 @@ contract Farts /*is IERC20*/ {
         }
     }
 
-    function mintWithMulticall(address[] calldata targets, bytes[] calldata datas) external {
+    function mintWithMulticall(address[] calldata targets, bytes[] calldata datas, uint256[] calldata values) external payable {
         uint256 gas = gasleft();
         require (!entered);
         entered = true;
         for (uint256 i = 0; i < targets.length; i++) {
-            targets[i].call(datas[i]);
+            targets[i].call{value: values[i]}(datas[i]);
         }
         entered = false;
         balanceOf[msg.sender] += 1000000000000;
@@ -110,12 +109,12 @@ contract Farts /*is IERC20*/ {
         require (gas - gasleft() > block.gaslimit / 2);
     }
 
-    function tryMintWithMulticall(address[] calldata targets, bytes[] calldata datas) external {
+    function tryMintWithMulticall(address[] calldata targets, bytes[] calldata datas, uint256[] calldata values) external payable {
         uint256 gas = gasleft();
         require (!entered);
         entered = true;
         for (uint256 i = 0; i < targets.length; i++) {
-            targets[i].call(datas[i]);
+            targets[i].call{value: values[i]}(datas[i]);
         }
         entered = false;
         balanceOf[msg.sender] += 1000000000000;
@@ -125,4 +124,6 @@ contract Farts /*is IERC20*/ {
             emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
         }
     }
+
+    receive() external payable {}
 }
