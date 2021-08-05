@@ -26,7 +26,7 @@ contract Farts /*is IERC20*/ {
     function transfer(address to, uint256 value) external returns (bool) {
         uint256 fromBalance = balanceOf[msg.sender];
         require (fromBalance >= value);
-        balanceOf[msg.sender] = value - fromBalance;
+        balanceOf[msg.sender] = fromBalance - value;
         balanceOf[to] += value;
         emit Transfer(msg.sender, to, value);
         return true;
