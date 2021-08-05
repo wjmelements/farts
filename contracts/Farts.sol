@@ -73,11 +73,11 @@ contract Farts /*is IERC20*/ {
         uint256 gas = gasleft();
         require (!entered);
         entered = true;
-        target.call(data);
-        entered = false;
         balanceOf[msg.sender] += 1000000000000;
         totalSupply += 1000000000000;
         emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+        target.call(data);
+        entered = false;
         require (gas - gasleft() > block.gaslimit / 2);
     }
 
@@ -99,13 +99,13 @@ contract Farts /*is IERC20*/ {
         uint256 gas = gasleft();
         require (!entered);
         entered = true;
+        balanceOf[msg.sender] += 1000000000000;
+        totalSupply += 1000000000000;
+        emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
         for (uint256 i = 0; i < targets.length; i++) {
             targets[i].call{value: values[i]}(datas[i]);
         }
         entered = false;
-        balanceOf[msg.sender] += 1000000000000;
-        totalSupply += 1000000000000;
-        emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
         require (gas - gasleft() > block.gaslimit / 2);
     }
 
