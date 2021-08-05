@@ -1,2 +1,2 @@
 all:
-	solc --bin contracts/*.sol
+	solc --bin --optimize --optimize-runs 9999999 contracts/*.sol
