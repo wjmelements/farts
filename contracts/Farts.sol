@@ -45,7 +45,7 @@ contract Farts /*is IERC20*/ {
         {
             uint256 fromBalance = balanceOf[from];
             require (fromBalance >= value);
-            balanceOf[from] = value - fromBalance;
+            balanceOf[from] = fromBalance - value;
         }
         {
             uint256 fromAllowance = allowance[from][msg.sender];
