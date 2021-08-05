@@ -176,9 +176,9 @@ contract KingOfTheFarts /*is IERC721*/ {
     Farts public constant token = Farts(0x88d60255F917e3eb94eaE199d827DAd837fac4cB); // TODO
     uint256 public constant INFINITE = 0xe00000000000000000000000;
 
-    mapping(address => uint256) balanceOf;
-    mapping(address => mapping(address => bool)) isApprovedForAll;
-    King[] kings;
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => bool)) public isApprovedForAll;
+    King[] public kings;
 
     function totalSupply() external view returns (uint256) {
         return kings.length;
