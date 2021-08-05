@@ -1,5 +1,7 @@
 pragma solidity ^0.6.8;
 
+pragma experimental ABIEncoderV2;
+
 interface IGasToken {
     function freeFrom(address, uint256) external returns (bool);
 }
@@ -87,6 +89,36 @@ contract Farts /*is IERC20*/ {
         entered = true;
         target.call(data);
         entered = false;
+        if (gas - gasleft() > block.gaslimit / 2) {
+            balanceOf[msg.sender] += 1000000000000;
+            totalSupply += 1000000000000;
+            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+        }
+    }
+
+    function mintWithMulticall(address[] calldata targets, bytes[] calldata datas) external {
+        uint256 gas = gasleft();
+        require (!entered);
+        entered = true;
+        for (uint256 i = 0; i < targets.length; i++) {
+            targets[i].call(datas[i]);
+        }
+        entered = false;
+        balanceOf[msg.sender] += 1000000000000;
+        totalSupply += 1000000000000;
+        emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+        require (gas - gasleft() > block.gaslimit / 2);
+    }
+
+    function tryMintWithMulticall(address[] calldata targets, bytes[] calldata datas) external {
+        uint256 gas = gasleft();
+        require (!entered);
+        entered = true;
+        for (uint256 i = 0; i < targets.length; i++) {
+            targets[i].call(datas[i]);
+        }
+        entered = false;
+        balanceOf[msg.sender] += 1000000000000;
         if (gas - gasleft() > block.gaslimit / 2) {
             balanceOf[msg.sender] += 1000000000000;
             totalSupply += 1000000000000;
