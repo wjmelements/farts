@@ -261,6 +261,7 @@ contract KingOfTheFarts /*is IERC721*/ {
     }
 
     function becomeKing() external {
+        require(tx.origin == msg.sender);
         uint96 balance = uint96(token.balanceOf(msg.sender));
         uint256 count = kings.length;
         if (count != 0) {
@@ -282,6 +283,7 @@ contract KingOfTheFarts /*is IERC721*/ {
     }
 
     function crown(address newKing) external {
+        require(tx.origin == msg.sender);
         uint96 balance = uint96(token.balanceOf(newKing));
         uint256 count = kings.length;
         if (count != 0) {
