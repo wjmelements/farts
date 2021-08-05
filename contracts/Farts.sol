@@ -18,6 +18,7 @@ contract Farts /*is IERC20*/ {
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
+    bool private entered;
 
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -67,10 +68,27 @@ contract Farts /*is IERC20*/ {
 
     function mintWithCall(address target, bytes calldata data) external {
         uint256 gas = gasleft();
+        require (!entered);
+        entered = true;
         target.call(data);
+        entered = false;
         balanceOf[msg.sender] += 1000000000000;
         totalSupply += 1000000000000;
         emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
         require (gas - gasleft() > block.gaslimit / 2);
+    }
+
+    // like mintWithCall, but don't revert for insufficient gas use
+    function tryMintWithCall(address target, bytes calldata data) external {
+        uint256 gas = gasleft();
+        require (!entered);
+        entered = true;
+        target.call(data);
+        entered = false;
+        if (gas - gasleft() > block.gaslimit / 2) {
+            balanceOf[msg.sender] += 1000000000000;
+            totalSupply += 1000000000000;
+            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+        }
     }
 }
