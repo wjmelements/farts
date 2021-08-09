@@ -1,4 +1,4 @@
-pragma solidity ^0.6.8;
+pragma solidity ^0.8.6;
 
 pragma experimental ABIEncoderV2;
 
@@ -25,13 +25,17 @@ contract Farts /*is IERC20*/ {
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     function transfer(address to, uint256 value) external returns (bool) {
-        {
-            uint256 fromBalance = balanceOf[msg.sender];
-            require (fromBalance >= value);
-            balanceOf[msg.sender] = fromBalance - value;
+        unchecked {
+            {
+                uint256 fromBalance = balanceOf[msg.sender];
+                require (fromBalance >= value);
+                balanceOf[msg.sender] = fromBalance - value;
+            }
+            {
+                balanceOf[to] += value;
+            }
+            emit Transfer(msg.sender, to, value);
         }
-        balanceOf[to] += value;
-        emit Transfer(msg.sender, to, value);
         return true;
     }
 
@@ -42,87 +46,107 @@ contract Farts /*is IERC20*/ {
     }
 
     function transferFrom(address from, address to, uint256 value) external returns (bool) {
-        {
-            uint256 fromBalance = balanceOf[from];
-            require (fromBalance >= value);
-            balanceOf[from] = fromBalance - value;
-        }
-        {
-            uint256 fromAllowance = allowance[from][msg.sender];
-            require (fromAllowance >= value);
-            if (fromAllowance < INFINITE) {
-                allowance[from][msg.sender] = fromAllowance - value;
+        unchecked {
+            {
+                uint256 fromBalance = balanceOf[from];
+                require (fromBalance >= value);
+                balanceOf[from] = fromBalance - value;
             }
+            {
+                uint256 fromAllowance = allowance[from][msg.sender];
+                require (fromAllowance >= value);
+                if (fromAllowance < INFINITE) {
+                    allowance[from][msg.sender] = fromAllowance - value;
+                }
+            }
+            balanceOf[to] += value;
+            emit Transfer(from, to, value);
         }
-        balanceOf[to] += value;
-        emit Transfer(from, to, value);
         return true;
     }
 
     function mintWithGasToken(IGasToken gasToken, uint256 burn) external {
-        uint256 gas = gasleft();
-        require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
-        require (!entered);
-        gasToken.freeFrom(msg.sender, burn);
-        balanceOf[msg.sender] += 1000000000000;
-        totalSupply += 1000000000000;
-        emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-        require (gas - gasleft() > block.gaslimit / 5);
+        unchecked {
+            uint256 gas = gasleft();
+            require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
+            require (!entered);
+            gasToken.freeFrom(msg.sender, burn);
+            balanceOf[msg.sender] += 1000000000000;
+            totalSupply += 1000000000000;
+            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+            require (gas - gasleft() > block.gaslimit / 5);
+        }
     }
 
     function mintWithCall(address target, bytes calldata data) external {
-        uint256 gas = gasleft();
-        require (!entered);
-        entered = true;
-        balanceOf[msg.sender] += 1000000000000;
-        totalSupply += 1000000000000;
-        emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-        target.call(data);
-        entered = false;
-        require (gas - gasleft() > block.gaslimit / 2);
+        unchecked {
+            uint256 gas = gasleft();
+            require (!entered);
+            entered = true;
+            balanceOf[msg.sender] += 1000000000000;
+            totalSupply += 1000000000000;
+            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+            target.call(data);
+            entered = false;
+            require (gas - gasleft() > block.gaslimit / 2);
+        }
     }
 
     // like mintWithCall, but don't revert for insufficient gas use
     function tryMintWithCall(address target, bytes calldata data) external {
-        uint256 gas = gasleft();
-        require (!entered);
-        entered = true;
-        target.call(data);
-        entered = false;
-        if (gas - gasleft() > block.gaslimit / 2) {
-            balanceOf[msg.sender] += 1000000000000;
-            totalSupply += 1000000000000;
-            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+        unchecked {
+            uint256 gas = gasleft();
+            require (!entered);
+            entered = true;
+            target.call(data);
+            entered = false;
+            if (gas - gasleft() > block.gaslimit / 2) {
+                balanceOf[msg.sender] += 1000000000000;
+                totalSupply += 1000000000000;
+                emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+            }
         }
     }
 
-    function mintWithMulticall(address[] calldata targets, bytes[] calldata datas, uint256[] calldata values) external payable {
-        uint256 gas = gasleft();
-        require (!entered);
-        entered = true;
-        balanceOf[msg.sender] += 1000000000000;
-        totalSupply += 1000000000000;
-        emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-        for (uint256 i = 0; i < targets.length; i++) {
-            targets[i].call{value: values[i]}(datas[i]);
-        }
-        entered = false;
-        require (gas - gasleft() > block.gaslimit / 2);
+    struct Call {
+        address target;
+        uint96 value;
+        bytes data;
     }
 
-    function tryMintWithMulticall(address[] calldata targets, bytes[] calldata datas, uint256[] calldata values) external payable {
-        uint256 gas = gasleft();
-        require (!entered);
-        entered = true;
-        for (uint256 i = 0; i < targets.length; i++) {
-            targets[i].call{value: values[i]}(datas[i]);
-        }
-        entered = false;
-        balanceOf[msg.sender] += 1000000000000;
-        if (gas - gasleft() > block.gaslimit / 2) {
+    function mintWithMulticall(Call[] calldata calls) external payable {
+        unchecked {
+            uint256 gas = gasleft();
+            require (!entered);
+            entered = true;
             balanceOf[msg.sender] += 1000000000000;
             totalSupply += 1000000000000;
             emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+            for (uint256 i = 0; i < calls.length; i++) {
+                Call memory call = calls[i];
+                call.target.call{value: call.value}(call.data);
+            }
+            entered = false;
+            require (gas - gasleft() > block.gaslimit / 2);
+        }
+    }
+
+    function tryMintWithMulticall(Call[] calldata calls) external payable {
+        unchecked {
+            uint256 gas = gasleft();
+            require (!entered);
+            entered = true;
+            for (uint256 i = 0; i < calls.length; i++) {
+                Call memory call = calls[i];
+                call.target.call{value: call.value}(call.data);
+            }
+            entered = false;
+            balanceOf[msg.sender] += 1000000000000;
+            if (gas - gasleft() > block.gaslimit / 2) {
+                balanceOf[msg.sender] += 1000000000000;
+                totalSupply += 1000000000000;
+                emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
+            }
         }
     }
 

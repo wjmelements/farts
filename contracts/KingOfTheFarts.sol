@@ -1,4 +1,4 @@
-pragma solidity ^0.6.8;
+pragma solidity ^0.8.6;
 
 
 import "./Farts.sol";
@@ -173,7 +173,7 @@ contract KingOfTheFarts /*is IERC721*/ {
         address approved;
     }
 
-    Farts public constant token = Farts(0x88d60255F917e3eb94eaE199d827DAd837fac4cB); // TODO
+    Farts public constant token = Farts(payable(0x88d60255F917e3eb94eaE199d827DAd837fac4cB)); // TODO
     uint256 public constant INFINITE = 0xe00000000000000000000000;
 
     mapping(address => uint256) public balanceOf;
@@ -275,7 +275,7 @@ contract KingOfTheFarts /*is IERC721*/ {
         kings.push(King(
             balance,
             msg.sender,
-            uint96(now),
+            uint96(block.timestamp),
             msg.sender,
             0x0000000000000000000000000000000000000000
         ));
@@ -297,7 +297,7 @@ contract KingOfTheFarts /*is IERC721*/ {
         kings.push(King(
             balance,
             newKing,
-            uint96(now),
+            uint96(block.timestamp),
             newKing,
             0x0000000000000000000000000000000000000000
         ));
