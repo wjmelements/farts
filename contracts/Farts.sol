@@ -1,7 +1,5 @@
 pragma solidity ^0.8.6;
 
-pragma experimental ABIEncoderV2;
-
 interface IGasToken {
     function freeFrom(address, uint256) external returns (bool);
 }
