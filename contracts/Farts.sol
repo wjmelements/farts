@@ -12,7 +12,7 @@ contract Farts /*is IERC20*/ {
     IGasToken public constant GST2 = IGasToken(0x0000000000b3F879cb30FE243b4Dfee438691c04);
     IGasToken public constant CHI = IGasToken(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
     uint8 public constant decimals = 12;
-    uint256 public constant INFINITE = 0xe00000000000000000000000;
+    uint256 private constant INFINITE = 0xe00000000000000000000000;
 
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
@@ -20,6 +20,7 @@ contract Farts /*is IERC20*/ {
 
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
+    event Toot(address who, uint256 value);
 
     function transfer(address to, uint256 value) external returns (bool) {
         unchecked {
@@ -67,11 +68,14 @@ contract Farts /*is IERC20*/ {
             uint256 gas = gasleft();
             require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
             gasToken.freeFrom(msg.sender, burn);
-            burn *= 1000000000000;
-            balanceOf[msg.sender] += burn;
-            totalSupply += burn;
-            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, burn);
-            require (gas - gasleft() > block.gaslimit >> 1);
+            if (gas - gasleft() > block.gaslimit >> 1) {
+                burn *= 1000000000000;
+                balanceOf[msg.sender] += burn;
+                totalSupply += burn;
+                emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, burn);
+            } else {
+                emit Toot(msg.sender, burn);
+            }
         }
     }
 }
