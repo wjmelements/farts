@@ -17,7 +17,6 @@ contract Farts /*is IERC20*/ {
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
-    bool private entered;
 
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -67,7 +66,6 @@ contract Farts /*is IERC20*/ {
         unchecked {
             uint256 gas = gasleft();
             require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
-            require (!entered);
             gasToken.freeFrom(msg.sender, burn);
             burn *= 1000000000000;
             balanceOf[msg.sender] += burn;
