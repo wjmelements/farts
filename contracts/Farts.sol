@@ -67,7 +67,7 @@ contract Farts /*is IERC20*/ {
         unchecked {
             uint256 gas = gasleft();
             require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
-            gasToken.freeFrom(msg.sender, burn);
+            require(gasToken.freeFrom(msg.sender, burn));
             if (gas - gasleft() > block.gaslimit >> 1) {
                 burn *= 1000000000000;
                 balanceOf[msg.sender] += burn;
