@@ -52,8 +52,8 @@ contract Farts /*is IERC20*/ {
             }
             {
                 uint256 fromAllowance = allowance[from][msg.sender];
-                require (fromAllowance >= value);
                 if (fromAllowance < INFINITE) {
+                    require (fromAllowance >= value);
                     allowance[from][msg.sender] = fromAllowance - value;
                 }
             }
@@ -69,84 +69,11 @@ contract Farts /*is IERC20*/ {
             require (gasToken == CHI || gasToken == GST2 || gasToken == GST1);
             require (!entered);
             gasToken.freeFrom(msg.sender, burn);
-            balanceOf[msg.sender] += 1000000000000;
-            totalSupply += 1000000000000;
-            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-            require (gas - gasleft() > block.gaslimit / 5);
+            burn *= 1000000000000;
+            balanceOf[msg.sender] += burn;
+            totalSupply += burn;
+            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, burn);
+            require (gas - gasleft() > block.gaslimit >> 1);
         }
     }
-
-    function mintWithCall(address target, bytes calldata data) external {
-        unchecked {
-            uint256 gas = gasleft();
-            require (!entered);
-            entered = true;
-            balanceOf[msg.sender] += 1000000000000;
-            totalSupply += 1000000000000;
-            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-            target.call(data);
-            entered = false;
-            require (gas - gasleft() > block.gaslimit / 2);
-        }
-    }
-
-    // like mintWithCall, but don't revert for insufficient gas use
-    function tryMintWithCall(address target, bytes calldata data) external {
-        unchecked {
-            uint256 gas = gasleft();
-            require (!entered);
-            entered = true;
-            target.call(data);
-            entered = false;
-            if (gas - gasleft() > block.gaslimit / 2) {
-                balanceOf[msg.sender] += 1000000000000;
-                totalSupply += 1000000000000;
-                emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-            }
-        }
-    }
-
-    struct Call {
-        address target;
-        uint96 value;
-        bytes data;
-    }
-
-    function mintWithMulticall(Call[] calldata calls) external payable {
-        unchecked {
-            uint256 gas = gasleft();
-            require (!entered);
-            entered = true;
-            balanceOf[msg.sender] += 1000000000000;
-            totalSupply += 1000000000000;
-            emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-            for (uint256 i = 0; i < calls.length; i++) {
-                Call memory call = calls[i];
-                call.target.call{value: call.value}(call.data);
-            }
-            entered = false;
-            require (gas - gasleft() > block.gaslimit / 2);
-        }
-    }
-
-    function tryMintWithMulticall(Call[] calldata calls) external payable {
-        unchecked {
-            uint256 gas = gasleft();
-            require (!entered);
-            entered = true;
-            for (uint256 i = 0; i < calls.length; i++) {
-                Call memory call = calls[i];
-                call.target.call{value: call.value}(call.data);
-            }
-            entered = false;
-            balanceOf[msg.sender] += 1000000000000;
-            if (gas - gasleft() > block.gaslimit / 2) {
-                balanceOf[msg.sender] += 1000000000000;
-                totalSupply += 1000000000000;
-                emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, 1000000000000);
-            }
-        }
-    }
-
-    receive() external payable {}
 }
