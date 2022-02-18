@@ -1,10 +1,13 @@
 pragma solidity ^0.8.6;
 
+import "./Fart.sol";
+
 interface IGasToken {
     function freeFrom(address, uint256) external returns (bool);
 }
 
 contract Farts /*is IERC20*/ {
+    Fart public constant FART = Fart(0xeD00FD000000012B78B8e2e6006000D200Fc0008);
 
     string public constant name = "BlockFarts"; // Attn Rappers: this rhymes with PopTarts
     string public constant symbol = "FARTS";
@@ -73,6 +76,7 @@ contract Farts /*is IERC20*/ {
                 balanceOf[msg.sender] += burn;
                 totalSupply += burn;
                 emit Transfer(0x0000000000000000000000000000000000000000, msg.sender, burn);
+                FART.mint(msg.sender);
             } else {
                 emit Toot(msg.sender, burn);
             }
